@@ -1,4 +1,4 @@
-package lx.project.project5.config;
+package lx.project.calander.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;

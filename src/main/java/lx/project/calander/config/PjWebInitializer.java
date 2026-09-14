@@ -1,4 +1,4 @@
-package lx.project.project5.config;
+package lx.project.calander.config;
 
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
