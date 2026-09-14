@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mapper-appHistory">
+
+   <!-- ========== 정책 ========== -->
+  <!-- 정책 신청 -->
+  <insert id="insertPolicy" parameterType="lx.project.calendar.to.PolicyAppHistoryTO">
+    INSERT INTO POLICY_APP_HISTORY
+           (POLICY_APP_ID, GOV_PROJECT_CODE, MEMBER_ID, APP_DATE, APP_STATUS)
+    VALUES (#{policyAppId}, #{govProjectCode}, #{memberId}, NOW(), 'Y')
+  </insert>
+
+  <!-- 내 정책 신청내역 -->
+  <select id="selectMyPolicy" parameterType="String" resultType="lx.project.calendar.to.PolicyAppHistoryTO">
+    SELECT h.POLICY_APP_ID, h.APP_DATE, h.APP_STATUS,
+           p.GOV_PROJECT_NAME, p.GOV_PROJECT_DATE
+      FROM POLICY_APP_HISTORY h
+      JOIN GOV_SUPPORT_POLICY p ON h.GOV_PROJECT_CODE = p.GOV_PROJECT_CODE
+     WHERE h.MEMBER_ID = #{memberId}
+     ORDER BY h.APP_DATE DESC
+  </select>
+
+  <!-- 신청 취소 -->
+  <delete id="deletePolicy" parameterType="String">
+    DELETE FROM POLICY_APP_HISTORY WHERE POLICY_APP_ID = #{policyAppId}
+  </delete>
+  
+   <!-- ========== 채용 ========== -->
+     <!-- 채용 신청 -->
+  <insert id="insertJob" parameterType="lx.project.calendar.to.JobAppHistoryTO">
+    INSERT INTO JOB_APP_HISTORY
+           (JOB_APP_ID, JOB_POSTING_CODE, MEMBER_ID, APP_DATE, APP_STATUS)
+    VALUES (#{jobAppId}, #{jobPostingCode}, #{memberId}, NOW(), 'Y')
+  </insert>
+<!-- 내 채용 신청내역 -->
+  <select id="selectMyJob" parameterType="String"
+          resultType="lx.project.calendar.to.JobAppHistoryTO">
+    SELECT h.JOB_APP_ID, h.JOB_POSTING_CODE, h.MEMBER_ID,
+           h.APP_DATE, h.APP_STATUS,
+           r.JOB_POSTING_NAME, r.JOB_POSTING_DATE
+      FROM JOB_APP_HISTORY h
+      JOIN RECRUITMENT r ON h.JOB_POSTING_CODE = r.JOB_POSTING_CODE
+     WHERE h.MEMBER_ID = #{memberId}
+     ORDER BY h.APP_DATE DESC
+  </select>
+<!-- 신청 취소 -->
+  <delete id="deleteJob" parameterType="String">
+    DELETE FROM JOB_APP_HISTORY WHERE JOB_APP_ID = #{jobAppId}
+  </delete>
+
+  <!-- ========== 자격증 ========== -->
+    <!-- 자격증 신청 -->
+  <insert id="insertCert" parameterType="lx.project.calendar.to.CertExamAppHistoryTO">
+    INSERT INTO CERT_EXAM_APP_HISTORY
+           (CERT_EXAM_APP_ID, MEMBER_ID, CERT_CODE, EXAM_SESSION)
+    VALUES (#{certExamAppId}, #{memberId}, #{certCode}, #{examSession})
+  </insert>
+<!-- 내 자격증 신청내역 -->
+  <select id="selectMyCert" parameterType="String"
+          resultType="lx.project.calendar.to.CertExamAppHistoryTO">
+    SELECT h.CERT_EXAM_APP_ID, h.MEMBER_ID, h.CERT_CODE, h.EXAM_SESSION,
+           c.CERT_NAME, e.EXAM_DATE
+      FROM CERT_EXAM_APP_HISTORY h
+      JOIN CERT_EXAM e ON h.CERT_CODE = e.CERT_CODE
+                      AND h.EXAM_SESSION = e.EXAM_SESSION
+      JOIN CERT c ON h.CERT_CODE = c.CERT_CODE
+     WHERE h.MEMBER_ID = #{memberId}
+     ORDER BY e.EXAM_DATE DESC
+  </select>
+<!-- 신청 취소 -->
+  <delete id="deleteCert" parameterType="String">
+    DELETE FROM CERT_EXAM_APP_HISTORY WHERE CERT_EXAM_APP_ID = #{certExamAppId}
+  </delete>
+
+</mapper>

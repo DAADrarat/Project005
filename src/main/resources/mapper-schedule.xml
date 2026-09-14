@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="schedule">
+
+	<!-- 정부사업일정 -->
+	<select id="selectPolicy"
+		resultType="lx.project.calendar.to.GovSupportPolicyTO">
+		SELECT GOV_PROJECT_CODE,
+		GOV_PROJECT_NAME,
+		GOV_PROJECT_DATE,
+		GOV_PROJECT_INFO,
+		TARGET_CONDITION
+		FROM GOV_SUPPORT_POLICY
+		ORDER BY
+		GOV_PROJECT_DATE
+	</select>
+	<!-- 자격시험일정 -->
+	<select id="selectCert"
+		resultType="lx.project.calendar.to.CertExamTO">
+		SELECT e.EXAM_SESSION,
+		e.EXAM_DATE,
+		e.CERT_CODE,
+		c.CERT_NAME,
+		c.CERT_INFO
+		FROM CERT_EXAM e
+		JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
+		ORDER BY e.EXAM_DATE
+	</select>
+	<!-- 직업정보 -->
+	<select id="selectJob"
+		resultType="lx.project.calendar.to.RecruitmentTO">
+		SELECT JOB_POSTING_CODE,
+		JOB_POSTING_NAME,
+		JOB_POSTING_DATE,
+		RECRUITMENT_INFO
+		FROM RECRUITMENT
+		ORDER BY JOB_POSTING_DATE
+	</select>
+	 <!-- 전체일정 (정책+자격증+채용 통합) -->
+	<select id="selectAll" resultType="lx.project.calendar.to.ScheduleTO">
+  SELECT 'POLICY'          AS allpcj,
+         GOV_PROJECT_CODE  AS CODE,
+         GOV_PROJECT_NAME  AS TITLE,
+         GOV_PROJECT_DATE  AS START_DATE,
+         GOV_PROJECT_INFO  AS INFO
+    FROM GOV_SUPPORT_POLICY
+
+  UNION ALL
+
+  SELECT 'CERT',
+         CONCAT(e.CERT_CODE, '-', e.EXAM_SESSION),
+         CONCAT(c.CERT_NAME, ' ', e.EXAM_SESSION),
+         e.EXAM_DATE,
+         c.CERT_INFO
+    FROM CERT_EXAM e
+    JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
+
+  UNION ALL
+
+  SELECT 'JOB',
+         JOB_POSTING_CODE,
+         JOB_POSTING_NAME,
+         JOB_POSTING_DATE,
+         RECRUITMENT_INFO
+    FROM RECRUITMENT
+
+   ORDER BY START_DATE
+</select>
+</mapper>
