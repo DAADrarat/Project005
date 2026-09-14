@@ -1,4 +1,4 @@
-package lx.project.project05.config;
+package lx.project.project5.config;
 
 import javax.sql.DataSource;
 
