@@ -37,6 +37,6 @@
   	</interceptor>
   </interceptors>
 
-  <context:component-scan base-package="lx.edu.myabweb" />
+  <context:component-scan base-package="lx.project.calendar" />
   <aop:aspectj-autoproxy></aop:aspectj-autoproxy>
 </beans:beans>
