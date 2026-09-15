@@ -1,76 +1,181 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="mapper-appHistory">
+<mapper namespace="appHistory">
 
-   <!-- ========== 정책 ========== -->
-  <!-- 정책 신청 -->
-  <insert id="insertPolicy" parameterType="lx.project.calendar.to.PolicyAppHistoryTO">
-    INSERT INTO POLICY_APP_HISTORY
-           (POLICY_APP_ID, GOV_PROJECT_CODE, MEMBER_ID, APP_DATE, APP_STATUS)
-    VALUES (#{policyAppId}, #{govProjectCode}, #{memberId}, NOW(), 'Y')
-  </insert>
+	<!-- ========== 정책 ========== -->
+	<!-- 정책 신청 -->
+	<insert id="insertPolicy"
+		parameterType="lx.project.calendar.to.PolicyAppHistoryTO">
+		INSERT INTO POLICY_APP_HISTORY
+		(POLICY_APP_ID,
+		GOV_PROJECT_CODE, MEMBER_ID, APP_DATE, APP_STATUS)
+		VALUES
+		(#{policyAppId}, #{govProjectCode}, #{memberId}, NOW(), 'Y')
+	</insert>
 
-  <!-- 내 정책 신청내역 -->
-  <select id="selectMyPolicy" parameterType="String" resultType="lx.project.calendar.to.PolicyAppHistoryTO">
-    SELECT h.POLICY_APP_ID, h.APP_DATE, h.APP_STATUS,
-           p.GOV_PROJECT_NAME, p.GOV_PROJECT_DATE
-      FROM POLICY_APP_HISTORY h
-      JOIN GOV_SUPPORT_POLICY p ON h.GOV_PROJECT_CODE = p.GOV_PROJECT_CODE
-     WHERE h.MEMBER_ID = #{memberId}
-     ORDER BY h.APP_DATE DESC
-  </select>
+	<!-- 내 정책 신청내역 -->
+	<select id="selectMyPolicy" parameterType="int"
+		resultType="lx.project.calendar.to.PolicyAppHistoryTO">
+		SELECT h.POLICY_APP_ID, h.APP_DATE, h.APP_STATUS,
+		p.GOV_PROJECT_NAME, p.POLICY_REGI_FIRSTDAY AS GOV_PROJECT_DATE
+		FROM
+		POLICY_APP_HISTORY h
+		JOIN GOV_SUPPORT_POLICY p ON
+		h.GOV_PROJECT_CODE =
+		p.GOV_PROJECT_CODE
+		WHERE h.MEMBER_ID = #{memberId}
+		ORDER BY h.APP_DATE
+		DESC
+	</select>
 
-  <!-- 신청 취소 -->
-  <delete id="deletePolicy" parameterType="String">
-    DELETE FROM POLICY_APP_HISTORY WHERE POLICY_APP_ID = #{policyAppId}
-  </delete>
-  
-   <!-- ========== 채용 ========== -->
-     <!-- 채용 신청 -->
-  <insert id="insertJob" parameterType="lx.project.calendar.to.JobAppHistoryTO">
-    INSERT INTO JOB_APP_HISTORY
-           (JOB_APP_ID, JOB_POSTING_CODE, MEMBER_ID, APP_DATE, APP_STATUS)
-    VALUES (#{jobAppId}, #{jobPostingCode}, #{memberId}, NOW(), 'Y')
-  </insert>
-<!-- 내 채용 신청내역 -->
-  <select id="selectMyJob" parameterType="String"
-          resultType="lx.project.calendar.to.JobAppHistoryTO">
-    SELECT h.JOB_APP_ID, h.JOB_POSTING_CODE, h.MEMBER_ID,
-           h.APP_DATE, h.APP_STATUS,
-           r.JOB_POSTING_NAME, r.JOB_POSTING_DATE
-      FROM JOB_APP_HISTORY h
-      JOIN RECRUITMENT r ON h.JOB_POSTING_CODE = r.JOB_POSTING_CODE
-     WHERE h.MEMBER_ID = #{memberId}
-     ORDER BY h.APP_DATE DESC
-  </select>
-<!-- 신청 취소 -->
-  <delete id="deleteJob" parameterType="String">
-    DELETE FROM JOB_APP_HISTORY WHERE JOB_APP_ID = #{jobAppId}
-  </delete>
+	<!-- 신청 취소 -->
+	<delete id="deletePolicy" parameterType="String">
+		DELETE FROM
+		POLICY_APP_HISTORY WHERE POLICY_APP_ID = #{policyAppId}
+	</delete>
 
-  <!-- ========== 자격증 ========== -->
-    <!-- 자격증 신청 -->
-  <insert id="insertCert" parameterType="lx.project.calendar.to.CertExamAppHistoryTO">
-    INSERT INTO CERT_EXAM_APP_HISTORY
-           (CERT_EXAM_APP_ID, MEMBER_ID, CERT_CODE, EXAM_SESSION)
-    VALUES (#{certExamAppId}, #{memberId}, #{certCode}, #{examSession})
-  </insert>
-<!-- 내 자격증 신청내역 -->
-  <select id="selectMyCert" parameterType="String"
-          resultType="lx.project.calendar.to.CertExamAppHistoryTO">
-    SELECT h.CERT_EXAM_APP_ID, h.MEMBER_ID, h.CERT_CODE, h.EXAM_SESSION,
-           c.CERT_NAME, e.EXAM_DATE
-      FROM CERT_EXAM_APP_HISTORY h
-      JOIN CERT_EXAM e ON h.CERT_CODE = e.CERT_CODE
-                      AND h.EXAM_SESSION = e.EXAM_SESSION
-      JOIN CERT c ON h.CERT_CODE = c.CERT_CODE
-     WHERE h.MEMBER_ID = #{memberId}
-     ORDER BY e.EXAM_DATE DESC
-  </select>
-<!-- 신청 취소 -->
-  <delete id="deleteCert" parameterType="String">
-    DELETE FROM CERT_EXAM_APP_HISTORY WHERE CERT_EXAM_APP_ID = #{certExamAppId}
-  </delete>
+	<!-- ========== 채용 ========== -->
+	<!-- 채용 신청 -->
+	<insert id="insertJob"
+		parameterType="lx.project.calendar.to.JobAppHistoryTO">
+		INSERT INTO JOB_APP_HISTORY
+		(JOB_APP_ID,
+		JOB_POSTING_CODE, MEMBER_ID, APP_DATE, APP_STATUS)
+		VALUES (#{jobAppId},
+		#{jobPostingCode}, #{memberId}, NOW(), 'Y')
+	</insert>
+	<!-- 내 채용 신청내역 -->
+	<select id="selectMyJob" parameterType="int"
+		resultType="lx.project.calendar.to.JobAppHistoryTO">
+		SELECT h.JOB_APP_ID, h.JOB_POSTING_CODE, h.MEMBER_ID,
+		h.APP_DATE, h.APP_STATUS,
+		r.JOB_POSTING_NAME, r.JOB_REGI_FIRSTDAY
+		FROM
+		JOB_APP_HISTORY h
+		JOIN RECRUITMENT r ON
+		h.JOB_POSTING_CODE =
+		r.JOB_POSTING_CODE
+		WHERE h.MEMBER_ID = #{memberId}
+		ORDER BY h.APP_DATE
+		DESC
+	</select>
+	<!-- 신청 취소 -->
+	<delete id="deleteJob" parameterType="String">
+		DELETE FROM JOB_APP_HISTORY
+		WHERE JOB_APP_ID = #{jobAppId}
+	</delete>
+
+	<!-- ========== 자격증 ========== -->
+	<!-- 자격증 신청 -->
+	<insert id="insertCert"
+		parameterType="lx.project.calendar.to.CertExamAppHistoryTO">
+		INSERT INTO CERT_EXAM_APP_HISTORY
+		(CERT_EXAM_APP_ID,
+		MEMBER_ID, CERT_CODE, EXAM_SESSION)
+		VALUES (#{certExamAppId},
+		#{memberId}, #{certCode}, #{examSession})
+	</insert>
+	<!-- 내 자격증 신청내역 -->
+	<select id="selectMyCert" parameterType="int"
+		resultType="lx.project.calendar.to.CertExamAppHistoryTO">
+		SELECT h.CERT_EXAM_APP_ID, h.MEMBER_ID, h.CERT_CODE,
+		h.EXAM_SESSION,
+		c.CERT_NAME, e.EXAM_REGI_FIRSTDAY
+		FROM
+		CERT_EXAM_APP_HISTORY h
+		JOIN CERT_EXAM e ON h.CERT_CODE = e.CERT_CODE
+		AND h.EXAM_SESSION =
+		e.EXAM_SESSION
+		JOIN CERT c ON h.CERT_CODE =
+		c.CERT_CODE
+		WHERE h.MEMBER_ID = #{memberId}
+		ORDER BY
+		e.EXAM_REGI_FIRSTDAY DESC
+	</select>
+	<!-- 신청 취소 -->
+	<delete id="deleteCert" parameterType="String">
+		DELETE FROM
+		CERT_EXAM_APP_HISTORY WHERE CERT_EXAM_APP_ID = #{certExamAppId}
+	</delete>
+	<!-- ========== 마이페이지 통합 ========== -->
+	<!-- 내가 신청한 정책+자격증+채용을 한 목록으로 (마이페이지 달력/목록용) -->
+	<!-- code 자리에 각 신청내역 PK 를 넣어서, 화면에서 취소 버튼에 그대로 쓸 수 있게 함 -->
+	<select id="selectMySchedule" parameterType="int"
+		resultType="lx.project.calendar.to.ScheduleTO">
+		SELECT 'POLICY' AS allpcj,
+		h.POLICY_APP_ID AS CODE,
+		p.GOV_PROJECT_NAME AS TITLE,
+		p.POLICY_REGI_FIRSTDAY AS START_DATE,
+		DATE_ADD(p.POLICY_REGI_LASTDAY, INTERVAL 1 DAY) AS END_DATE,
+		p.GOV_PROJECT_INFO AS INFO
+		FROM POLICY_APP_HISTORY h
+		JOIN
+		GOV_SUPPORT_POLICY p ON h.GOV_PROJECT_CODE = p.GOV_PROJECT_CODE
+		WHERE
+		h.MEMBER_ID = #{memberId}
+
+		UNION ALL
+
+		SELECT 'CERT',
+		h.CERT_EXAM_APP_ID,
+		CONCAT(c.CERT_NAME, ' ', h.EXAM_SESSION),
+		e.EXAM_REGI_FIRSTDAY,
+		DATE_ADD(e.EXAM_REGI_LASTDAY, INTERVAL 1 DAY),
+		c.CERT_INFO
+		FROM
+		CERT_EXAM_APP_HISTORY h
+		JOIN CERT_EXAM e ON h.CERT_CODE = e.CERT_CODE
+		AND h.EXAM_SESSION = e.EXAM_SESSION
+		JOIN CERT c ON h.CERT_CODE =
+		c.CERT_CODE
+		WHERE h.MEMBER_ID = #{memberId}
+
+		UNION ALL
+
+		SELECT 'JOB',
+		h.JOB_APP_ID,
+		r.JOB_POSTING_NAME,
+		r.JOB_REGI_FIRSTDAY,
+		DATE_ADD(r.JOB_REGI_LASTDAY, INTERVAL 1 DAY),
+		r.RECRUITMENT_INFO
+		FROM
+		JOB_APP_HISTORY h
+		JOIN RECRUITMENT r ON h.JOB_POSTING_CODE =
+		r.JOB_POSTING_CODE
+		WHERE h.MEMBER_ID = #{memberId}
+
+		ORDER BY START_DATE
+	</select>
+
+	<!-- 내가선택한취업스케줄 -->
+	<select id="selectMyJobSchedule" parameterType="int"
+		resultType="lx.project.calendar.to.ScheduleTO">
+		SELECT 'JOB' AS allpcj,
+		r.JOB_POSTING_CODE AS code,
+		r.JOB_POSTING_NAME AS title,
+		r.JOB_REGI_LASTDAY AS startDate,
+		r.RECRUITMENT_INFO AS info
+		FROM JOB_APP_HISTORY j
+		JOIN RECRUITMENT r ON
+		j.JOB_POSTING_CODE = r.JOB_POSTING_CODE
+		WHERE j.MEMBER_ID = #{memberId}
+	</select>
+	<!-- 내가선택한 자격증스케줄 -->
+	<select id="selectMyCertList" parameterType="int"
+		resultType="lx.project.calendar.to.CertHistoryTO">
+		SELECT
+		c.CERT_NAME AS certName,
+		ce.EXAM_REGI_FIRSTDAY AS
+		examStart,
+		ce.EXAM_REGI_LASTDAY AS examEnd
+		FROM CERT_EXAM_APP_HISTORY h
+		JOIN CERT_EXAM ce ON h.CERT_CODE = ce.CERT_CODE AND h.EXAM_SESSION =
+		ce.EXAM_SESSION
+		JOIN CERT c ON h.CERT_CODE = c.CERT_CODE
+		WHERE
+		h.MEMBER_ID = #{memberId}
+	</select>
+
 
 </mapper>

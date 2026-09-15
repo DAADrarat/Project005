@@ -1,7 +1,5 @@
 package lx.project.calendar.to;
 
-import java.time.LocalDate;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 public class CertExamAppHistoryTO {
 	private String certExamAppId;
-	private String memberId;
+	private int memberId;
 	private String certCode;
 	private String examSession;
 	

@@ -177,16 +177,13 @@
 			<scope>compile</scope>
 		</dependency>
 
-		<!-- Source:
-		https://mvnrepository.com/artifact/tools.jackson.core/jackson-databind -->
-		<!--
-	<dependency>
-	    <groupId>tools.jackson.core</groupId>
-	    <artifactId>jackson-databind</artifactId>
-	    <version>3.2.2</version>
-	    <scope>compile</scope>
-	</dependency>
-	-->
+		<!-- LocalDate / LocalDateTime 을 JSON 으로 변환하기 위한 모듈 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>2.22.2</version>
+		</dependency>
+		
 		<dependency>
 			<groupId>jakarta.xml.bind</groupId>
 			<artifactId>jakarta.xml.bind-api</artifactId>
@@ -224,6 +221,11 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<version>6.0.0</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sendgrid</groupId>
+			<artifactId>sendgrid-java</artifactId>
+			<version>4.10.1</version>
 		</dependency>
 
 	</dependencies>

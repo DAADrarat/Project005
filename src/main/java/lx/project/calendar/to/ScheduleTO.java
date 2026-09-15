@@ -17,5 +17,6 @@ import lombok.NoArgsConstructor;
 	    private String code;
 	    private String title;
 	    private LocalDate startDate;
+	    private LocalDate endDate;
 	    private String info;
 }

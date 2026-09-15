@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 
 public class CertExamTO {
 	private String examSession;
-	private LocalDate examDate;
+	private LocalDate examRegiFirstday;
 	// private String examLocation; 자격증시험 시험장소 삭제
 	private String certCode;
 	private String certName; // 추가

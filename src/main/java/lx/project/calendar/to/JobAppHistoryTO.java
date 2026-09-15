@@ -16,7 +16,7 @@ public class JobAppHistoryTO {
 	
 	private String jobAppId;
 	private String jobPostingCode;
-	private String memberId;
+	private int memberId;
 	private LocalDate appDate;
 	private String appStatus;
 	

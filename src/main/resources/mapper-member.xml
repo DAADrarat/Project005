@@ -1,37 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-  
-<mapper namespace="mapper-member">
 
-  <!-- 로그인 -->
-  <select id="login" resultType="lx.project.calendar.to.MemberTO">
-    SELECT MEMBER_ID, USER_ID, NAME, EMAIL, USER_AGE,
-           EDUCATION_LEVEL, MAJOR, EMP_STATUS
-      FROM MEMBER
-     WHERE USER_ID = #{userId}
-       AND PASSWORD = #{password}
-  </select>
+<mapper namespace="member">
 
-  <!-- 회원정보 조회 -->
-  <select id="selectOne" parameterType="String" resultType="lx.project.calendar.to.MemberTO">
-    SELECT * FROM MEMBER WHERE MEMBER_ID = #{memberId}
-  </select>
+	<!-- 로그인 -->
+	<select id="login" resultType="lx.project.calendar.to.MemberTO">
+		SELECT MEMBER_ID, USER_ID, NAME, EMAIL, USER_AGE,
+		EDUCATION_LEVEL, MAJOR, EMP_STATUS
+		FROM MEMBER
+		WHERE USER_ID = #{userId}
+		AND PASSWORD = #{password}
+	</select>
 
-  <!-- 보유 자격증 -->
-  <select id="selectPossessedCert" parameterType="String"
-          resultType="lx.project.calendar.to.PossessedCertTO">
-    SELECT HISTORY_NO, POSSESSED_CERT_NAME, MEMBER_ID
-      FROM POSSESSED_CERT
-     WHERE MEMBER_ID = #{memberId}
-  </select>
+	<!-- 회원정보 조회 -->
+	<select id="selectOne" parameterType="int"
+		resultType="lx.project.calendar.to.MemberTO">
+		SELECT * FROM MEMBER WHERE MEMBER_ID = #{memberId}
+	</select>
 
-  <!-- 회원가입 -->
-  <insert id="insert" parameterType="lx.project.calendar.to.MemberTO">
-    INSERT INTO MEMBER (MEMBER_ID, USER_ID, PASSWORD, EMAIL, USER_AGE,
-                        NAME, EDUCATION_LEVEL, MAJOR, EMP_STATUS)
-    VALUES (#{memberId}, #{userId}, #{password}, #{email}, #{userAge},
-            #{name}, #{educationLevel}, #{major}, #{empStatus})
-  </insert>
+	<!-- 보유 자격증 -->
+	<select id="selectPossessedCert" parameterType="int"
+		resultType="lx.project.calendar.to.PossessedCertTO">
+		SELECT HISTORY_NO, POSSESSED_CERT_NAME, MEMBER_ID
+		FROM POSSESSED_CERT
+		WHERE MEMBER_ID = #{memberId}
+	</select>
+
+	<!-- 회원가입 -->
+	<insert id="insert"
+		parameterType="lx.project.calendar.to.MemberTO">
+		INSERT INTO MEMBER (MEMBER_ID, USER_ID, PASSWORD, EMAIL, USER_AGE,
+		NAME, EDUCATION_LEVEL, MAJOR, EMP_STATUS)
+		VALUES (#{memberId}, #{userId}, #{password}, #{email}, #{userAge},
+		#{name}, #{educationLevel}, #{major}, #{empStatus})
+	</insert>
+	
+	<!-- 회원정보 수정 -->
+	<update id="update"
+		parameterType="lx.project.calendar.to.MemberTO">
+		UPDATE MEMBER
+		SET USER_ID = #{userId}, PASSWORD = #{password}, NAME = #{name}, USER_AGE
+		= #{userAge},
+		EDUCATION_LEVEL = #{educationLevel}, MAJOR = #{major}, EMP_STATUS = #{empStatus}
+		WHERE MEMBER_ID = #{memberId}
+	</update>
+	
+	<!-- 회원탈퇴 -->
+  	<delete id="delete" parameterType="int">
+		DELETE FROM MEMBER WHERE MEMBER_ID = #{memberId}
+	</delete>
+	
+	<!-- 뱃지 -->
+	<select id="getCertsByCodes" parameterType="java.util.List" resultType="lx.project.calendar.to.CertTO">
+	    SELECT 
+	        CERT_CODE AS certCode, 
+	        CERT_INFO AS certInfo, 
+	        CERT_NAME AS certName
+	    FROM CERT
+	    WHERE CERT_CODE IN
+	    <foreach item="code" collection="list" open="(" separator="," close=")">
+	        #{code}
+	    </foreach>
+	</select>
 
 </mapper>

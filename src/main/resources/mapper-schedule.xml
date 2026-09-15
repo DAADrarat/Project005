@@ -4,68 +4,137 @@
 
 <mapper namespace="schedule">
 
-	<!-- 정부사업일정 -->
-	<select id="selectPolicy"
-		resultType="lx.project.calendar.to.GovSupportPolicyTO">
-		SELECT GOV_PROJECT_CODE,
-		GOV_PROJECT_NAME,
-		GOV_PROJECT_DATE,
-		GOV_PROJECT_INFO,
-		TARGET_CONDITION
-		FROM GOV_SUPPORT_POLICY
-		ORDER BY
-		GOV_PROJECT_DATE
-	</select>
-	<!-- 자격시험일정 -->
-	<select id="selectCert"
+	<!-- ==================== 목록용 (원래 TO 그대로) ==================== -->
+	<!-- 자격증 검색 (키워드가 없으면 전체) -->
+	<select id="selectCertByKeyword" parameterType="string"
 		resultType="lx.project.calendar.to.CertExamTO">
 		SELECT e.EXAM_SESSION,
-		e.EXAM_DATE,
+		e.EXAM_REGI_FIRSTDAY,
 		e.CERT_CODE,
 		c.CERT_NAME,
 		c.CERT_INFO
 		FROM CERT_EXAM e
 		JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
-		ORDER BY e.EXAM_DATE
+		<if test="_parameter != null and _parameter != ''">
+			WHERE c.CERT_NAME LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		ORDER BY e.EXAM_REGI_FIRSTDAY
 	</select>
-	<!-- 직업정보 -->
+	<!-- 정부사업일정 -->
+	<select id="selectPolicy"
+		resultType="lx.project.calendar.to.GovSupportPolicyTO">
+		SELECT GOV_PROJECT_CODE,
+		GOV_PROJECT_NAME,
+		POLICY_REGI_FIRSTDAY AS GOV_PROJECT_DATE,
+		GOV_PROJECT_INFO,
+		TARGET_CONDITION
+		FROM GOV_SUPPORT_POLICY
+		ORDER BY POLICY_REGI_FIRSTDAY
+	</select>
+
+	<!-- 자격시험일정 -->
+	<select id="selectCert"
+		resultType="lx.project.calendar.to.CertExamTO">
+		SELECT e.EXAM_SESSION,
+		e.EXAM_REGI_FIRSTDAY,
+		e.CERT_CODE,
+		c.CERT_NAME,
+		c.CERT_INFO
+		FROM CERT_EXAM e
+		JOIN CERT c ON e.CERT_CODE =
+		c.CERT_CODE
+		ORDER BY e.EXAM_REGI_FIRSTDAY
+	</select>
+
+	<!-- 채용공고 -->
 	<select id="selectJob"
 		resultType="lx.project.calendar.to.RecruitmentTO">
 		SELECT JOB_POSTING_CODE,
 		JOB_POSTING_NAME,
-		JOB_POSTING_DATE,
+		JOB_REGI_LASTDAY
+		AS JOB_POSTING_DATE,
 		RECRUITMENT_INFO
 		FROM RECRUITMENT
-		ORDER BY JOB_POSTING_DATE
+		ORDER BY
+		JOB_REGI_LASTDAY
 	</select>
-	 <!-- 전체일정 (정책+자격증+채용 통합) -->
-	<select id="selectAll" resultType="lx.project.calendar.to.ScheduleTO">
-  SELECT 'POLICY'          AS allpcj,
-         GOV_PROJECT_CODE  AS CODE,
-         GOV_PROJECT_NAME  AS TITLE,
-         GOV_PROJECT_DATE  AS START_DATE,
-         GOV_PROJECT_INFO  AS INFO
-    FROM GOV_SUPPORT_POLICY
 
-  UNION ALL
+	<!-- ==================== 달력용 (ScheduleTO 로 통일) ==================== -->
 
-  SELECT 'CERT',
-         CONCAT(e.CERT_CODE, '-', e.EXAM_SESSION),
-         CONCAT(c.CERT_NAME, ' ', e.EXAM_SESSION),
-         e.EXAM_DATE,
-         c.CERT_INFO
-    FROM CERT_EXAM e
-    JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
+	<select id="selectAll"
+		resultType="lx.project.calendar.to.ScheduleTO">
+		SELECT 'POLICY' AS allpcj,
+		GOV_PROJECT_CODE AS CODE,
+		GOV_PROJECT_NAME AS TITLE,
+		POLICY_REGI_FIRSTDAY AS START_DATE,
+		DATE_ADD(POLICY_REGI_LASTDAY, INTERVAL 1 DAY) AS END_DATE,
+		GOV_PROJECT_INFO AS INFO
+		FROM GOV_SUPPORT_POLICY
 
-  UNION ALL
+		UNION ALL
 
-  SELECT 'JOB',
-         JOB_POSTING_CODE,
-         JOB_POSTING_NAME,
-         JOB_POSTING_DATE,
-         RECRUITMENT_INFO
-    FROM RECRUITMENT
+		SELECT 'CERT',
+		CONCAT(e.CERT_CODE, '|', e.EXAM_SESSION),
+		CONCAT(c.CERT_NAME, ' ', e.EXAM_SESSION),
+		e.EXAM_REGI_FIRSTDAY,
+		DATE_ADD(e.EXAM_REGI_LASTDAY, INTERVAL 1 DAY),
+		c.CERT_INFO
+		FROM CERT_EXAM e
+		JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
 
-   ORDER BY START_DATE
-</select>
+		UNION ALL
+
+		SELECT 'JOB',
+		JOB_POSTING_CODE,
+		JOB_POSTING_NAME,
+		JOB_REGI_FIRSTDAY,
+		DATE_ADD(JOB_REGI_LASTDAY, INTERVAL 1 DAY),
+		RECRUITMENT_INFO
+		FROM RECRUITMENT
+
+		ORDER BY START_DATE
+	</select>
+
+	<!-- 타입별 일정 (POLICY / CERT / JOB) -->
+	<select id="selectByType" parameterType="string"
+		resultType="lx.project.calendar.to.ScheduleTO">
+		<choose>
+			<when test='_parameter == "POLICY"'>
+				SELECT 'POLICY' AS allpcj,
+				GOV_PROJECT_CODE AS CODE,
+				GOV_PROJECT_NAME AS TITLE,
+				POLICY_REGI_FIRSTDAY AS START_DATE,
+				DATE_ADD(POLICY_REGI_LASTDAY, INTERVAL 1 DAY) AS END_DATE,
+				GOV_PROJECT_INFO AS INFO
+				FROM GOV_SUPPORT_POLICY
+				ORDER BY
+				POLICY_REGI_FIRSTDAY
+			</when>
+			<when test='_parameter == "CERT"'>
+				SELECT 'CERT' AS allpcj,
+				CONCAT(e.CERT_CODE, '|',
+				e.EXAM_SESSION) AS CODE,
+				CONCAT(c.CERT_NAME, ' ', e.EXAM_SESSION) AS
+				TITLE,
+				e.EXAM_REGI_FIRSTDAY AS START_DATE,
+				DATE_ADD(e.EXAM_REGI_LASTDAY, INTERVAL 1 DAY) AS END_DATE,
+				c.CERT_INFO AS INFO
+				FROM CERT_EXAM e
+				JOIN CERT c ON e.CERT_CODE =
+				c.CERT_CODE
+				ORDER BY e.EXAM_REGI_FIRSTDAY
+			</when>
+			<otherwise>
+				SELECT 'JOB' AS allpcj,
+				JOB_POSTING_CODE AS CODE,
+				JOB_POSTING_NAME AS TITLE,
+				JOB_REGI_FIRSTDAY AS START_DATE,
+				DATE_ADD(JOB_REGI_LASTDAY, INTERVAL 1 DAY) AS END_DATE,
+				RECRUITMENT_INFO AS INFO
+				FROM RECRUITMENT
+				ORDER BY JOB_REGI_FIRSTDAY
+			</otherwise>
+		</choose>
+	</select>
+
 </mapper>

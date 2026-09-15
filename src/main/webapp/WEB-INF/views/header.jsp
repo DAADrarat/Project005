@@ -27,9 +27,9 @@
             정보
           </a>
           <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="infoDropdown">
-            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/policy">정책</a></li>
-            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/exam">시험</a></li>
-            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/recruitment">채용</a></li>
+            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/calendarPolicy.do">정책</a></li>
+            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/calendarCertification.do">시험</a></li>
+            <li><a class="dropdown-item" href="${pageContext.request.contextPath}/calendarJob.do">채용</a></li>
           </ul>
         </li>
         
@@ -39,9 +39,14 @@
         </li>
 
         <!-- 2. 로그인 버튼 -->
-        <li class="nav-item">
-          <a class="btn btn-outline-primary btn-sm px-3" href="${pageContext.request.contextPath}/login.do">로그인</a>
-        </li>
+        <c:if test="${not empty sessionScope.userId}">
+        	<a href="logout.do" class="header-link">로그아웃</a>
+        </c:if>
+        
+        <c:if test="${empty sessionScope.userId}">
+  			<a href="login.do" class="header-link">로그인</a>
+		</c:if>
+        
 
       </ul>
     </div>
