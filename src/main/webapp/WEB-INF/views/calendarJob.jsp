@@ -7,8 +7,11 @@
 <title>마이페이지 - 채용공고일정</title>
 
 <!-- 1. FullCalendar v6 라이브러리 불러오기 -->
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
-<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/css/project.css" type="text/css" />
+<script
+	src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+<link rel="stylesheet"
+	href="${pageContext.request.contextPath}/resources/css/project.css"
+	type="text/css" />
 
 </head>
 <body>
@@ -44,30 +47,27 @@
 		<div id="calendar"></div>
 
 		<!-- 채용 공고 리스트 영역 -->
-		<form id="applyForm" method="post" action="${pageContext.request.contextPath}/applyJob.do">
+		<form id="applyForm" method="post"
+			action="${pageContext.request.contextPath}/applyJob.do">
 			<div class="policy-section">
 				<div class="policy-left">
 					<div>
 						<div class="policy-header-flex">
 							<h3>관심 채용공고 선택</h3>
 							<div class="search-box-crappy">
-								<input type="text" placeholder="공고 검색...">
-								<button type="button">조회</button>
+								<input type="text" id="searchKeyword" placeholder="공고 검색...">
+								<button type="button" id="searchBtn">조회</button>
 							</div>
 						</div>
-						<ul class="policy-list">
-								<c:forEach var="j" items="${jobList}">
-									<li>
-										<a href="#" title="${j.recruitmentInfo}">${j.jobPostingName}</a>
-										<input type="checkbox"
-											   name="jobPostingCode"
-											   value="${j.jobPostingCode}"
-											   data-label="${j.jobPostingName}">
-									</li>
-								</c:forEach>
-								<c:if test="${empty jobList}">
-									<li class="empty-msg">등록된 채용공고가 없습니다.</li>
-								</c:if>
+						<ul class="policy-list" id="jobList">
+							<c:forEach var="j" items="${jobList}">
+								<li><a href="#" title="${j.recruitmentInfo}">${j.jobPostingName}</a>
+									<input type="checkbox" value="${j.jobPostingCode}"
+									data-label="${j.jobPostingName}"></li>
+							</c:forEach>
+							<c:if test="${empty jobList}">
+								<li class="empty-msg">등록된 채용공고가 없습니다.</li>
+							</c:if>
 						</ul>
 					</div>
 				</div>
@@ -85,9 +85,9 @@
 					<button type="submit" class="checkout-btn">선택한 공고 지원하기</button>
 				</div>
 			</div>
-			</form>
+		</form>
 	</div>
-	
+
 	<script>
 		document.addEventListener('DOMContentLoaded', function() {
 			const calendarEl = document.getElementById('calendar');
@@ -121,32 +121,78 @@
 
 			calendar.render();
 		});
-
-		const checkboxes = document
-				.querySelectorAll('.policy-list input[type="checkbox"]');
+		const listEl       = document.getElementById('jobList');
 		const selectedList = document.getElementById('selected-policies');
 
-		function updateSelectedPolicies() {
-			selectedList.innerHTML = '';
-			let isChecked = false;
+		const selected = new Map();   // key = jobPostingCode, value = 공고 이름
 
-			checkboxes.forEach(function(box) {
-				if (box.checked) {
-					isChecked = true;
-					const li = document.createElement('li');
-					li.textContent = box.dataset.label || box.value;
-					selectedList.appendChild(li);
-				}
-			});
+		listEl.addEventListener('change', function(ev) {
+		    const box = ev.target;
+		    if (!box.matches('input[type="checkbox"]')) return;
 
-			if (!isChecked) {
-				selectedList.innerHTML = '<li class="empty-msg">선택된 공고가 없습니다. 왼쪽에서 체크해주세요.</li>';
-			}
+		    if (box.checked) {
+		        selected.set(box.value, box.dataset.label || box.value);
+		    } else {
+		        selected.delete(box.value);
+		    }
+		    renderSelected();
+		});
+
+		function renderSelected() {
+		    if (selected.size === 0) {
+		        selectedList.innerHTML = '<li class="empty-msg">선택된 공고가 없습니다. 왼쪽에서 체크해주세요.</li>';
+		        return;
+		    }
+
+		    selectedList.innerHTML = '';
+		    selected.forEach(function(label, value) {
+		        const li = document.createElement('li');
+		        li.textContent = label;
+
+		        const hidden = document.createElement('input');
+		        hidden.type  = 'hidden';
+		        hidden.name  = 'jobPostingCode';
+		        hidden.value = value;
+		        li.appendChild(hidden);
+
+		        selectedList.appendChild(li);
+		    });
 		}
 
-		checkboxes.forEach(function(box) {
-			box.addEventListener('change', updateSelectedPolicies);
-		});
+		async function searchJob() {
+		    const keyword = document.getElementById('searchKeyword').value.trim();
+		    const url = '${pageContext.request.contextPath}/searchJob.do?keyword='
+		              + encodeURIComponent(keyword);
+
+		    const res  = await fetch(url);
+		    const list = await res.json();
+
+		    if (list.length === 0) {
+		        listEl.innerHTML = '<li class="empty-msg">검색 결과가 없습니다.</li>';
+		        return;
+		    }
+
+		    listEl.innerHTML = list.map(function(j) {
+		        return '<li>'
+		             + '<a href="#" title="' + (j.recruitmentInfo || '') + '">' + j.jobPostingName + '</a>'
+		             + '<input type="checkbox" value="' + j.jobPostingCode + '"'
+		             + ' data-label="' + j.jobPostingName + '"'
+		             + (selected.has(j.jobPostingCode) ? ' checked' : '')
+		             + '>'
+		             + '</li>';
+		    }).join('');
+		}
+
+		document.getElementById('searchBtn')
+		        .addEventListener('click', searchJob);
+
+		document.getElementById('searchKeyword')
+		        .addEventListener('keydown', function(ev) {
+		            if (ev.key === 'Enter') {
+		                ev.preventDefault();
+		                searchJob();
+		            }
+		        });
 	</script>
 
 </body>

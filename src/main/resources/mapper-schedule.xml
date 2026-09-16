@@ -32,6 +32,73 @@
 		ORDER BY POLICY_REGI_FIRSTDAY
 	</select>
 
+	<!-- ajax -->
+	<select id="selectJobByKeyword" parameterType="string"
+		resultType="lx.project.calendar.to.RecruitmentTO">
+		SELECT JOB_POSTING_CODE,
+		JOB_POSTING_NAME,
+		JOB_REGI_LASTDAY AS
+		JOB_POSTING_DATE,
+		RECRUITMENT_INFO
+		FROM RECRUITMENT
+		<if test="_parameter != null and _parameter != ''">
+			WHERE JOB_POSTING_NAME LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		ORDER BY JOB_REGI_LASTDAY
+	</select>
+
+	<select id="selectPolicyByKeyword" parameterType="string"
+		resultType="lx.project.calendar.to.GovSupportPolicyTO">
+		SELECT GOV_PROJECT_CODE,
+		GOV_PROJECT_NAME,
+		POLICY_REGI_FIRSTDAY AS
+		GOV_PROJECT_DATE,
+		GOV_PROJECT_INFO,
+		TARGET_CONDITION
+		FROM
+		GOV_SUPPORT_POLICY
+		<if test="_parameter != null and _parameter != ''">
+			WHERE GOV_PROJECT_NAME LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		ORDER BY POLICY_REGI_FIRSTDAY
+	</select>
+	<select id="selectAllByKeyword" parameterType="string"
+		resultType="lx.project.calendar.to.ScheduleTO">
+		SELECT t.* FROM (
+		SELECT 'POLICY' AS allpcj,
+		GOV_PROJECT_CODE AS CODE,
+		GOV_PROJECT_NAME AS TITLE,
+		POLICY_REGI_FIRSTDAY AS START_DATE,
+		DATE_ADD(POLICY_REGI_LASTDAY, INTERVAL 1 DAY) AS END_DATE,
+		GOV_PROJECT_INFO AS INFO
+		FROM GOV_SUPPORT_POLICY
+
+		UNION ALL
+
+		SELECT 'CERT',
+		CONCAT(e.CERT_CODE, '|', e.EXAM_SESSION),
+		CONCAT(c.CERT_NAME, ' ', e.EXAM_SESSION),
+		e.EXAM_REGI_FIRSTDAY,
+		DATE_ADD(e.EXAM_REGI_LASTDAY, INTERVAL 1 DAY),
+		c.CERT_INFO
+		FROM CERT_EXAM e
+		JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
+
+		UNION ALL
+
+		SELECT 'JOB',
+		JOB_POSTING_CODE,
+		JOB_POSTING_NAME,
+		JOB_REGI_FIRSTDAY,
+		DATE_ADD(JOB_REGI_LASTDAY, INTERVAL 1 DAY),
+		RECRUITMENT_INFO
+		FROM RECRUITMENT
+		) t
+		<if test="_parameter != null and _parameter != ''">
+			WHERE t.TITLE LIKE CONCAT('%', #{keyword}, '%')
+		</if>
+		ORDER BY t.START_DATE
+	</select>
 	<!-- 자격시험일정 -->
 	<select id="selectCert"
 		resultType="lx.project.calendar.to.CertExamTO">
@@ -75,12 +142,15 @@
 
 		SELECT 'CERT',
 		CONCAT(e.CERT_CODE, '|', e.EXAM_SESSION),
-		CONCAT(c.CERT_NAME, ' ', e.EXAM_SESSION),
+		CONCAT(c.CERT_NAME, ' ',
+		e.EXAM_SESSION),
 		e.EXAM_REGI_FIRSTDAY,
-		DATE_ADD(e.EXAM_REGI_LASTDAY, INTERVAL 1 DAY),
+		DATE_ADD(e.EXAM_REGI_LASTDAY,
+		INTERVAL 1 DAY),
 		c.CERT_INFO
 		FROM CERT_EXAM e
-		JOIN CERT c ON e.CERT_CODE = c.CERT_CODE
+		JOIN CERT c ON e.CERT_CODE
+		= c.CERT_CODE
 
 		UNION ALL
 

@@ -18,8 +18,10 @@ import lx.project.calendar.dao.MyPageDAO;
 import lx.project.calendar.service.MemberService;
 import lx.project.calendar.to.CertExamTO;
 import lx.project.calendar.to.CertTO;
+import lx.project.calendar.to.GovSupportPolicyTO;
 import lx.project.calendar.to.JobAppHistoryTO;
 import lx.project.calendar.to.MemberTO;
+import lx.project.calendar.to.RecruitmentTO;
 import lx.project.calendar.to.ScheduleTO;
 import lx.project.calendar.service.MyPageService;
 import lx.project.calendar.service.ScheduleService;
@@ -234,12 +236,33 @@ public class MainController {
 		myPageService.cancelApply(type, appId);
 		return "redirect:/myPage.do";
 	}
-	
+	//ajax 검색을 위한
 	@RequestMapping("/searchCert.do")
 	@ResponseBody                                   // ← 뷰가 아니라 데이터를 그대로 반환
 	public List<CertExamTO> searchCert(
 	        @RequestParam(value = "keyword", required = false) String keyword) {
 	    return scheduleService.searchCert(keyword);
 	}
-
+	
+	
+	@RequestMapping("/searchPolicy.do")
+	@ResponseBody
+	public List<GovSupportPolicyTO> searchPolicy(
+			@RequestParam(value = "keyword", required = false) String keyword) {
+		return scheduleService.searchPolicy(keyword);
+	}
+	
+	@RequestMapping("/searchJob.do")
+	@ResponseBody
+	public List<RecruitmentTO> searchJob(
+			@RequestParam(value = "keyword", required = false) String keyword) {
+		return scheduleService.searchJob(keyword);
+	}
+	
+	@RequestMapping("/searchAll.do")
+	@ResponseBody
+	public List<ScheduleTO> searchAll(
+			@RequestParam(value = "keyword", required = false) String keyword) {
+		return scheduleService.searchAll(keyword);
+	}
 }

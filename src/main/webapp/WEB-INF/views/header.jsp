@@ -9,7 +9,7 @@
   <div class="container-fluid">
     <!-- 1. 제일 왼쪽: 로고 위치 -->
     <a class="navbar-brand fw-bold" href="${pageContext.request.contextPath}/main.do">
-      <span class="text-primary">LOGO</span>
+      <span class="text-primary">안경찬기환</span>
     </a>
 
     <!-- 모바일 반응형 토글 버튼 -->

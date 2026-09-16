@@ -59,11 +59,11 @@
 						<div class="policy-header-flex">
 							<h3>관심 목록 선택</h3>
 							<div class="search-box-crappy">
-								<input type="text" id="itemKeyword" placeholder="검색어 입력...">
-								<button type="button" id="btnItemSearch">조회</button>
+								<input type="text" id="searchKeyword" placeholder="검색어 입력...">
+								<button type="button" id="searchBtn">조회</button>
 							</div>
 						</div>
-						<ul class="policy-list" id="policyList">
+						<ul class="policy-list" id="policyList" id="allList">
 							<c:forEach var="e" items="${events}">
 								<li><a href="#" title="${e.info}">${e.title}</a> <!-- name="items" 제거: 제출은 hidden input이 담당 -->
 									<input type="checkbox" value="${e.allpcj}~${e.code}"
@@ -72,7 +72,7 @@
 							<c:if test="${empty events}">
 								<li class="empty-msg">등록된 일정이 없습니다.</li>
 							</c:if>
-							<div id="hiddenSelectedInputs" style="display:none;"></div>
+							
 						</ul>
 					</div>
 				</div>
@@ -129,30 +129,79 @@
             calendar.render();
         });
 
-        const checkboxes = document.querySelectorAll('.policy-list input[type="checkbox"]');
+        const listEl       = document.getElementById('allList');
         const selectedList = document.getElementById('selected-policies');
 
-        function updateSelectedPolicies() {
-            selectedList.innerHTML = '';
-            let isChecked = false; 
+        const selected = new Map();   // key = "종류~코드", value = 제목
 
-            checkboxes.forEach(function(box) {
-                if (box.checked) {
-                    isChecked = true;
-                    const li = document.createElement('li');
-                    li.textContent = box.dataset.label || box.value;
-                    selectedList.appendChild(li);
-                }
-            });
+        listEl.addEventListener('change', function(ev) {
+            const box = ev.target;
+            if (!box.matches('input[type="checkbox"]')) return;
 
-            if (!isChecked) {
-                selectedList.innerHTML = '<li class="empty-msg">선택된 정책이 없습니다. 왼쪽에서 체크해주세요.</li>';
+            if (box.checked) {
+                selected.set(box.value, box.dataset.label || box.value);
+            } else {
+                selected.delete(box.value);
             }
+            renderSelected();
+        });
+
+        function renderSelected() {
+            if (selected.size === 0) {
+                selectedList.innerHTML = '<li class="empty-msg">선택된 목록이 없습니다. 왼쪽에서 체크해주세요.</li>';
+                return;
+            }
+
+            selectedList.innerHTML = '';
+            selected.forEach(function(label, value) {
+                const li = document.createElement('li');
+                li.textContent = label;
+
+                const hidden = document.createElement('input');
+                hidden.type  = 'hidden';
+                hidden.name  = 'items';
+                hidden.value = value;
+                li.appendChild(hidden);
+
+                selectedList.appendChild(li);
+            });
         }
 
-        checkboxes.forEach(function(box) {
-            box.addEventListener('change', updateSelectedPolicies);
-        });
+        async function searchAll() {
+            const keyword = document.getElementById('searchKeyword').value.trim();
+            const url = '${pageContext.request.contextPath}/searchAll.do?keyword='
+                      + encodeURIComponent(keyword);
+
+            const res  = await fetch(url);
+            const list = await res.json();
+
+            if (list.length === 0) {
+                listEl.innerHTML = '<li class="empty-msg">검색 결과가 없습니다.</li>';
+                return;
+            }
+
+            listEl.innerHTML = list.map(function(e) {
+                const value = e.allpcj + '~' + e.code;
+                return '<li>'
+                     + '<a href="#" title="' + (e.info || '') + '">' + e.title + '</a>'
+                     + '<input type="checkbox" value="' + value + '"'
+                     + ' data-label="' + e.title + '"'
+                     + (selected.has(value) ? ' checked' : '')
+                     + '>'
+                     + '</li>';
+            }).join('');
+        }
+
+        document.getElementById('searchBtn')
+                .addEventListener('click', searchAll);
+
+        document.getElementById('searchKeyword')
+                .addEventListener('keydown', function(ev) {
+                    if (ev.key === 'Enter') {
+                        ev.preventDefault();
+                        searchAll();
+                    }
+                });
     </script>
 
 </body>
