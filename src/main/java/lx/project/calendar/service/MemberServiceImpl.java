@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sendgrid.Method;
@@ -64,27 +65,31 @@ public class MemberServiceImpl implements MemberService {
 		}
 		return false;
 	}
-
+	@Value("${sendgrid.api.key}")
+	private String sendGridApiKey;
+	
 	private void sendWelcomeEmail(String userEmail) {
-		Email from = new Email("lck6183@naver.com");
-		String subject = "Team5 Project 회원가입을 환영합니다!";
-		Email to = new Email(userEmail);
-		Content content = new Content("text/plain", "가입이 완료되었습니다. 캘린더에서 다양한 일정을 확인해 보세요!");
+        Email from = new Email("lck6183@naver.com");
+        String subject = "Team5 Project 회원가입을 환영합니다!";
+        Email to = new Email(userEmail);
+        Content content = new Content("text/plain", "가입이 완료되었습니다. 캘린더에서 다양한 일정을 확인해 보세요!");
 
-		Mail mail = new Mail(from, subject, to, content);
-		SendGrid sg = new SendGrid("");
-		Request request = new Request();
+        Mail mail = new Mail(from, subject, to, content);
+        SendGrid sg = new SendGrid(sendGridApiKey);
+        Request request = new Request();
 
-		try {
-			request.setMethod(Method.POST);
-			request.setEndpoint("mail/send");
-			request.setBody(mail.build());
-			Response response = sg.api(request);
-			System.out.println("메일 발송 성공 상태코드: " + response.getStatusCode());
-		} catch (IOException ex) {
-			System.out.println("메일 발송 실패: " + ex.getMessage());
-		}
-	}
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+            System.out.println("메일 발송 성공 상태코드: " + response.getStatusCode());
+        } catch (IOException ex) {
+            System.out.println("메일 발송 실패: " + ex.getMessage());
+        }
+    }
+	
+	
 	// 시연용 이메일
 	// lck6183@naver.com
 	// alen1@naver.com

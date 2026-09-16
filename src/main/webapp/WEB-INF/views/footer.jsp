@@ -19,7 +19,7 @@
                 <a href="https://github.com/DAAdrarat/Project5" target="_blank" class="btn btn-outline-dark btn-sm d-inline-flex align-items-center gap-2">
                     <!-- Bootstrap Icons - GitHub -->
                     <i class="bi bi-github fs-6"></i>
-                    <span>Team 5 GitHub :  https://github.com/DAADrarat/Project5.git</span>
+                    <span>Team 5 GitHub :  https://github.com/DAADrarat/Project005.git</span>
                 </a>
             </div>
 

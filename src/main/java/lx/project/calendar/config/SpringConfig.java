@@ -2,6 +2,7 @@ package lx.project.calendar.config;
 
 import javax.sql.DataSource;
 
+
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -10,8 +11,10 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 
 @Configuration
+@PropertySource("classpath:config.properties")
 public class SpringConfig {
 // DB,데이터 계층을 담은자바 코드
 	

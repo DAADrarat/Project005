@@ -63,7 +63,7 @@
 								<button type="button" id="searchBtn">조회</button>
 							</div>
 						</div>
-						<ul class="policy-list" id="policyList" id="allList">
+						<ul class="policy-list" id="allList">
 							<c:forEach var="e" items="${events}">
 								<li><a href="#" title="${e.info}">${e.title}</a> <!-- name="items" 제거: 제출은 hidden input이 담당 -->
 									<input type="checkbox" value="${e.allpcj}~${e.code}"
@@ -203,6 +203,9 @@
                     }
                 });
     </script>
-
+	
+	 <!-- 3. 공통 푸터 -->
+     <jsp:include page="/WEB-INF/views/footer.jsp" /> 
+	
 </body>
 </html>

@@ -1,5 +1,6 @@
 package lx.project.calendar.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -230,6 +231,50 @@ public class MainController {
 		return "redirect:/myPage.do";
 	}
 
+	@RequestMapping(value = "/applyAll.do", method = RequestMethod.POST)
+	public String applyAll(@RequestParam(value = "items", required = false) List<String> items,
+			HttpSession session) {
+
+		Integer memberId = (Integer) session.getAttribute("memberId");
+		if (memberId == null)
+			return "redirect:/login.do";
+
+		if (items == null || items.isEmpty())
+			return "redirect:/calendarAll.do";
+
+		// 종류별로 나눠 담아서 각 서비스를 한 번씩만 호출
+		List<String> policyCodes = new ArrayList<>();
+		List<String> certKeys    = new ArrayList<>();
+		List<String> jobCodes    = new ArrayList<>();
+
+		for (String item : items) {
+			if (item == null || !item.contains("~"))
+				continue;
+
+			// "POLICY~POL_01" → ["POLICY", "POL_01"]
+			// 2를 주면 뒤쪽은 안 쪼개짐 (CERT 의 "HW1|2026_80_HW" 보존)
+			String[] parts = item.split("~", 2);
+
+			switch (parts[0]) {
+			case "POLICY":
+				policyCodes.add(parts[1]);
+				break;
+			case "CERT":
+				certKeys.add(parts[1]);
+				break;
+			case "JOB":
+				jobCodes.add(parts[1]);
+				break;
+			}
+		}
+
+		myPageService.applyPolicies(memberId, policyCodes);
+		myPageService.applyCerts(memberId, certKeys);
+		myPageService.applyJobs(memberId, jobCodes);
+
+		return "redirect:/myPage.do";
+	}
+	
 	// 취소버튼
 	@RequestMapping(value = "/cancelApply.do", method = RequestMethod.POST)
 	public String cancelApply(@RequestParam("type") String type, @RequestParam("appId") String appId) {

@@ -109,6 +109,8 @@
 		</div>
 	</div>
 
+	 <!-- 3. 공통 푸터 -->
+     <jsp:include page="/WEB-INF/views/footer.jsp" /> 
 
 </body>
 </html>
